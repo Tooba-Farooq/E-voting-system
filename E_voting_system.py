@@ -18,7 +18,7 @@ cnamelabel = None
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Construct the path to the Access database file
-db_file = os.path.join(current_dir, 'PD.accdb')
+db_file = os.path.join(current_dir, 'Citizens_Candidates.accdb')
 
 # Establish connection
 con = pyodbc.connect((r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
@@ -26,6 +26,7 @@ con = pyodbc.connect((r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
 
 # Create a tkinter window
 root2 = customtkinter.CTk()
+root2.geometry("%dx%d" % (root2.winfo_screenwidth(), root2.winfo_screenheight()))
 root2.title("User Login")
 customtkinter.set_default_color_theme("green")
 
@@ -64,7 +65,7 @@ def mainwindow():
     # Function to translate the content
     def translate():
         cursor3 = con.cursor()
-        cursor3.execute(f"FROM Citizens WHERE Password = '{user_pass}' SELECT Name ")
+        cursor3.execute(f"SELECT Name FROM Citizens WHERE Password = '{user_pass}'")
         user_data = cursor3.fetchall()
         namelabel2 = user_data[0][0]
         dashboard = customtkinter.CTkFrame(master=right_frame1, width=1800, fg_color="white", height=500,
@@ -211,12 +212,8 @@ def mainwindow():
                 messagebox.showinfo("Vote Casted", f"You have successfully voted for {selected_candidate}!")
                 # Disable the vote button to prevent multiple votes
                 votebutton.config(state=DISABLED)
-                """cursor1.execute("UPDATE [PM Candidates] SET Votes = Votes+1 WHERE Party = ?",
-                                selected_party)"""
                 cursor1.execute(f"UPDATE [MNA Candidates] SET Votes = Votes+1 WHERE (Party = '{selected_party}' AND "
                                 f"[Constituency code] = '{ccodelabel}')")
-                """cursor1.execute("UPDATE CM_Candidate SET Votes = Votes+1 WHERE (Party = ? AND Province = ?)",
-                                (selected_party, provincelabel))"""
                 # Update the 'Voted' status for the user in the database
                 cursor1.execute(f"UPDATE Citizens SET Voted = 'Yes' WHERE ID = '{idlabel}'")
                 con.commit()
@@ -263,105 +260,6 @@ def mainwindow():
             inform = Label(master=voteframe, text="You have already voted!",
                            font=("Times New Roman", 12), fg="black", bg="white")
             inform.place(relx=0.43, rely=0.79)
-
-    """def pm_frame():
-        cursor2 = con.cursor()
-        pmframe = customtkinter.CTkFrame(master=right_frame1, width=1800, fg_color="white", height=500,
-                                         corner_radius=0)
-        pmframe.pack(side="right", fill="both")
-        ecp_banner_label1 = Label(master=pmframe, image=ecp_banner, background="white", height=250)
-        ecp_banner_label1.pack(fill=Y)
-        key = Label(master=pmframe, text="Key", font=("Times New Roman", 18, "italic"), fg="black", bg="white",
-                    height=2)
-        key.place(relx=0.69, rely=0.47)
-        c = ["#32a852", "#01796f", "#5f7a67", "#052b10"]
-        for i in range(0, 4):
-            colour1 = Label(master=pmframe, text=" ", bg=c[i], width=12, height=2)
-            colour1.place(relx=0.53, rely=0.56 + (0.09 * i))
-        cursor2.execute("SELECT Party, [Candidate Name] FROM [PM Candidates]")
-        candidate = cursor2.fetchall()
-        for j in range(0, 4):
-            candidate_name = Label(master=pmframe, text=f"{candidate[j][1]} ({candidate[j][0]})",
-                                   font=("Times New Roman", 16), fg="black", bg="white", height=2)
-            candidate_name.place(relx=0.63, rely=0.55 + (0.09 * j))
-        cursor2.execute("SELECT Party, Votes FROM [PM Candidates]")
-        pmdata = cursor2.fetchall()
-        pmparties, pmvotes = zip(*pmdata)
-        fig, ax = plt.subplots()
-        bars = ax.bar(pmparties, pmvotes, color=c, width=0.4)
-        cursor2.execute("SELECT COUNT (*) FROM Citizens WHERE Voted <> 'Yes'")
-        result = cursor2.fetchone()
-        if result[0] == 0:
-            winner_index = pmvotes.index(max(pmvotes))
-            winner_party = pmparties[winner_index]
-            cursor2.execute("SELECT [Candidate Name] FROM [PM Candidates] WHERE Party = ?", (winner_party,))
-            winner_candidate = cursor2.fetchone()
-            runner_up_index = (winner_index + 1) % len(pmparties)
-            vote_difference = pmvotes[winner_index] - pmvotes[runner_up_index]
-            ax.set_xlabel(f"{winner_candidate[0]} ({winner_party}) has won by {vote_difference} votes")
-        for bar, vote_count in zip(bars, pmvotes):
-            ax.annotate(str(vote_count), xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
-                        xytext=(0, 3), textcoords="offset points",
-                        ha='center', va='bottom')
-        ax.set_ylim(0, max(pmvotes) * 1.1)
-        ax.set_title("Votes for PM", fontsize=10)
-        canvas = FigureCanvasTkAgg(fig, master=pmframe)
-        canvas.draw()
-        canvas.get_tk_widget().place(relx=0.28, rely=0.28, anchor="n")
-        plt.close(fig)
-
-    def cm_frame():
-        global provincelabel
-        cursor1 = con.cursor()
-        cursor1.execute(f"SELECT Province FROM Citizens WHERE Password = '{user_pass}'")
-        user_data = cursor1.fetchall()
-        if user_data:
-            provincelabel = user_data[0][0]
-        cmframe = customtkinter.CTkFrame(master=right_frame1, width=1800, fg_color="white", height=500,
-                                         corner_radius=0)
-        cmframe.pack(side="right", fill="both")
-        ecp_banner_label1 = Label(master=cmframe, image=ecp_banner, background="white", height=250)
-        ecp_banner_label1.pack(fill=Y)
-        key = Label(master=cmframe, text="Key", font=("Times New Roman", 18, "italic"), fg="black", bg="white",
-                    height=2)
-        key.place(relx=0.69, rely=0.47)
-        c = ["#32a852", "#01796f", "#5f7a67", "#052b10"]
-        for i in range(0, 4):
-            colour1 = Label(master=cmframe, text=" ", bg=c[i], width=12, height=2)
-            colour1.place(relx=0.53, rely=0.56 + (0.09 * i))
-        cursor1.execute("SELECT Party, Candidate_Name FROM CM_Candidate WHERE Province=?",
-                        (provincelabel,))
-        candidate = cursor1.fetchall()
-        for j in range(0, 4):
-            candidate_name = Label(master=cmframe, text=f"{candidate[j][1]} ({candidate[j][0]})",
-                                   font=("Times New Roman", 16), fg="black", bg="white", height=2)
-            candidate_name.place(relx=0.63, rely=0.55 + (0.09 * j))
-        cursor1.execute("SELECT Party, Votes FROM CM_Candidate WHERE Province=?", (provincelabel,))
-        cmdata = cursor1.fetchall()
-        cmparties, cmvotes = zip(*cmdata)
-        fig1, ax1 = plt.subplots()
-        bars = ax1.bar(cmparties, cmvotes, color=c, width=0.4)
-        cursor1.execute("SELECT COUNT (*) FROM Citizens WHERE Voted <> 'Yes'")
-        result = cursor1.fetchone()
-        if result[0] == 0:
-            winner_index1 = cmvotes.index(max(cmvotes))
-            winner_party1 = cmparties[winner_index1]
-            cursor1.execute("SELECT Candidate_Name FROM CM_Candidate WHERE (Province = ? AND"
-                            " Party = ?)", (provincelabel, winner_party1))
-            winner_candidate = cursor1.fetchone()
-            runner_up_index1 = (winner_index1 + 1) % len(cmparties)
-            vote_difference1 = cmvotes[winner_index1] - cmvotes[runner_up_index1]
-            ax1.set_xlabel(f"{winner_candidate[0]} ({winner_party1}) has won by {vote_difference1} votes")
-        ax1.set_title(f"Votes for CM ({provincelabel})", fontsize=10)
-        for bar, vote_count in zip(bars, cmvotes):
-            ax1.annotate(str(vote_count), xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
-                         xytext=(0, 3), textcoords="offset points",
-                         ha='center', va='bottom')
-        ax1.set_ylim(0, max(cmvotes) * 1.1)
-        canvas1 = FigureCanvasTkAgg(fig1, master=cmframe)
-        canvas1.draw()
-        canvas1.get_tk_widget().place(relx=0.28, rely=0.28, anchor="n")
-        plt.close(fig1)"""
 
     def display_election_results(constituency_code, frame):
         cursor = con.cursor()
@@ -575,8 +473,6 @@ def mainwindow():
         dashboard_indicate.config(background="#014112")
         user_button_indicate.config(background="#014112")
         votepanel_indicate.config(background="#014112")
-        """pm_indicate.config(background="#014112")
-        cm_indicate.config(background="#014112")"""
         mna_indicate.config(background="#014112")
         search_indicate.config(background="#014112")
         help_indicate.config(background="#014112")
@@ -612,19 +508,6 @@ def mainwindow():
     votepanel_button.place(x=5, y=360)
     votepanel_indicate = Label(master=left_frame1, text=" ", background="#014112", width=1, height=2)
     votepanel_indicate.place(x=2, y=363)
-
-    """pm_button = customtkinter.CTkButton(master=left_frame1, hover_color="#568203", fg_color="#014112",
-                                        text="Result for PM", font=("sans serif", 33, "bold"), width=250,
-                                        command=lambda: when_clickedd(pm_indicate, pm_frame))
-    pm_button.place(x=5, y=420)
-    pm_indicate = Label(master=left_frame1, text=" ", background="#014112", width=1, height=2)
-    pm_indicate.place(x=2, y=423)
-    cm_button = customtkinter.CTkButton(master=left_frame1, hover_color="#568203", fg_color="#014112",
-                                        text="Result for CM", font=("sans serif", 33, "bold"), width=250,
-                                        command=lambda: when_clickedd(cm_indicate, cm_frame))
-    cm_button.place(x=5, y=480)
-    cm_indicate = Label(master=left_frame1, text=" ", background="#014112", width=1, height=2)
-    cm_indicate.place(x=2, y=483)"""
     mna_button = customtkinter.CTkButton(master=left_frame1, hover_color="#568203", fg_color="#014112",
                                          text="Result", font=("sans serif", 33, "bold"), width=250,
                                          command=lambda: when_clickedd(mna_indicate, mna_frame))
