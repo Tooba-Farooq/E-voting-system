@@ -8,7 +8,7 @@ This project is created by:
 - [@Tooba-Farooq](https://github.com/Tooba-Farooq) 
 - [@Ayesha-Bhatti23030](https://github.com/Ayesha-Bhatti23030)
 
-- ## Features
+## Features
 
 - **Login Page**: Users can log in with their CNIC number and password. New users can register from this page.
 - **Authentication**: During registration and login, the system verifies the provided credentials for accuracy. It also ensures that individuals below the age of 18 are not allowed to register by checking their date of birth against the database.
