@@ -4,8 +4,8 @@ An E-voting system replicating Pakistan's election system.
 ## Team Members
 This project is created by:
 
-- [@kkJawaid](https://github.com/Tooba-Farooq) 
-- [@Tooba-Farooq](https://github.com/kkJawaid) 
+- [@kkJawaid](https://github.com/kkJawaid) 
+- [@Tooba-Farooq](https://github.com/Tooba-Farooq) 
 - [@Ayesha-Bhatti23030](https://github.com/Ayesha-Bhatti23030)
 
 - ## Features
